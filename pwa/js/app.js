@@ -27,7 +27,7 @@ let dados = Storage.carregar();
 let ultimasAtribuicoes = [];
 let ultimoSeed = null;
 let arquivoOcrPendente = null;
-let ocrImagemBitmap = null;
+let ocrPreviewCanvas = null;
 let deferredInstallPrompt = null;
 let salvando = false;
 
@@ -256,7 +256,11 @@ async function processarOcrComAjustes() {
     abrirPreviewPilotos(pilotos);
   } catch (erro) {
     esconderLoading();
-    window.alert("Falha ao ler a imagem.");
+    const msg =
+      erro?.message === "offline"
+        ? "Sem conexão com a internet. Na primeira leitura, o app precisa baixar o motor de OCR."
+        : window.OcrKart.mensagemErroImagem(erro, arquivoOcrPendente);
+    window.alert(msg);
     console.error(erro);
   } finally {
     arquivoOcrPendente = null;
@@ -267,24 +271,38 @@ async function processarOcrComAjustes() {
 
 async function prepararOcr(file) {
   if (!file) return;
-  arquivoOcrPendente = file;
-  ocrImagemBitmap = await createImageBitmap(file);
-  atualizarCanvasOcr();
-  dialogOcrEl.showModal();
+
+  mostrarLoading("Abrindo imagem...");
+
+  try {
+    arquivoOcrPendente = file;
+    ocrPreviewCanvas = await window.OcrKart.prepararPreview(file);
+    esconderLoading();
+    atualizarCanvasOcr();
+    dialogOcrEl.showModal();
+  } catch (erro) {
+    esconderLoading();
+    arquivoOcrPendente = null;
+    ocrPreviewCanvas = null;
+    window.alert(window.OcrKart.mensagemErroImagem(erro, file));
+    console.error(erro);
+    document.getElementById("input-camera").value = "";
+    document.getElementById("input-galeria").value = "";
+  }
 }
 
 function atualizarCanvasOcr() {
-  if (!ocrImagemBitmap) return;
+  if (!ocrPreviewCanvas) return;
   const canvas = document.getElementById("ocr-canvas");
   const brilho = parseFloat(document.getElementById("ocr-brightness").value);
   const contraste = parseFloat(document.getElementById("ocr-contrast").value);
   const maxLargura = 600;
-  const escala = Math.min(1, maxLargura / ocrImagemBitmap.width);
-  canvas.width = ocrImagemBitmap.width * escala;
-  canvas.height = ocrImagemBitmap.height * escala;
+  const escala = Math.min(1, maxLargura / ocrPreviewCanvas.width);
+  canvas.width = Math.round(ocrPreviewCanvas.width * escala);
+  canvas.height = Math.round(ocrPreviewCanvas.height * escala);
   const ctx = canvas.getContext("2d");
   ctx.filter = `brightness(${brilho}) contrast(${contraste})`;
-  ctx.drawImage(ocrImagemBitmap, 0, 0, canvas.width, canvas.height);
+  ctx.drawImage(ocrPreviewCanvas, 0, 0, canvas.width, canvas.height);
 }
 
 function importarArquivoTexto(file, parser) {
@@ -552,6 +570,7 @@ dialogRepescarEl.addEventListener("close", () => {
 
 document.getElementById("btn-ocr-cancelar").addEventListener("click", () => {
   arquivoOcrPendente = null;
+  ocrPreviewCanvas = null;
   dialogOcrEl.close();
 });
 document.getElementById("btn-ocr-confirmar").addEventListener("click", processarOcrComAjustes);

@@ -2,6 +2,7 @@ const HEADER_PATTERN =
   /^(pilotos?|nome|lista|participantes?|classifica|posi[cç][aã]o|kart|grid|total|inscri[cç][oõ]es?)$/i;
 const NUMBER_ONLY = /^\d+$/;
 const PREFIX_NUMBER = /^\d+[\.\)\-:\s]+/;
+const MAX_LADO_OCR = 1600;
 
 function limparLinha(line) {
   let texto = line.trim();
@@ -23,25 +24,94 @@ function filtrarPilotos(lines) {
   return window.SorteioCore.aplicarCorrecoesNomes(pilotos);
 }
 
+function mensagemErroImagem(erro, file) {
+  const tipo = (file?.type || "").toLowerCase();
+  const nome = (file?.name || "").toLowerCase();
+
+  if (!navigator.onLine) {
+    return "Sem conexão com a internet. Na primeira leitura, o app precisa baixar o motor de OCR.";
+  }
+
+  if (tipo.includes("heic") || tipo.includes("heif") || nome.endsWith(".heic") || nome.endsWith(".heif")) {
+    return "Formato HEIC (foto do iPhone) não suportado neste aparelho. Tire um print (captura de tela) ou salve a imagem como JPG/PNG.";
+  }
+
+  if (erro?.name === "InvalidStateError" || erro?.message?.includes("memory")) {
+    return "Imagem muito grande para processar. Tente um print menor ou uma foto mais próxima da lista.";
+  }
+
+  if (erro?.message?.includes("could not be decoded") || erro?.message?.includes("decode")) {
+    return "Formato de imagem não suportado. Use JPG ou PNG.";
+  }
+
+  return "Não foi possível abrir esta imagem. Tente outra foto, um print da tela ou cole a lista manualmente.";
+}
+
+function carregarImagemViaElemento(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error("decode"));
+    };
+    img.src = url;
+  });
+}
+
+async function carregarFonteImagem(file) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    return { fonte: bitmap, fechar: () => bitmap.close?.() };
+  } catch {
+    const img = await carregarImagemViaElemento(file);
+    return { fonte: img, fechar: () => {} };
+  }
+}
+
 async function preprocessarImagem(file, brightness = 1.1, contrast = 1.25) {
-  const imagem = await createImageBitmap(file);
-  const canvas = document.createElement("canvas");
-  canvas.width = imagem.width;
-  canvas.height = imagem.height;
-  const ctx = canvas.getContext("2d");
-  ctx.filter = `brightness(${brightness}) contrast(${contrast})`;
-  ctx.drawImage(imagem, 0, 0);
-  return canvas;
+  const { fonte, fechar } = await carregarFonteImagem(file);
+
+  try {
+    const maiorLado = Math.max(fonte.width, fonte.height);
+    const escala = Math.min(1, MAX_LADO_OCR / maiorLado);
+    const largura = Math.max(1, Math.round(fonte.width * escala));
+    const altura = Math.max(1, Math.round(fonte.height * escala));
+
+    const canvas = document.createElement("canvas");
+    canvas.width = largura;
+    canvas.height = altura;
+    const ctx = canvas.getContext("2d");
+    ctx.filter = `brightness(${brightness}) contrast(${contrast})`;
+    ctx.drawImage(fonte, 0, 0, largura, altura);
+    return canvas;
+  } finally {
+    fechar();
+  }
 }
 
 async function extrairPilotosDaImagem(file, onProgress, opcoes = {}) {
+  if (!navigator.onLine) {
+    throw new Error("offline");
+  }
+
   const canvas = await preprocessarImagem(
     file,
     opcoes.brightness ?? 1.1,
     opcoes.contrast ?? 1.25
   );
 
-  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  const blob = await new Promise((resolve, reject) => {
+    canvas.toBlob((resultado) => {
+      if (resultado) resolve(resultado);
+      else reject(new Error("blob"));
+    }, "image/png");
+  });
+
   const { data } = await Tesseract.recognize(blob, "por", {
     logger: (message) => {
       if (onProgress && message.status === "recognizing text") {
@@ -58,18 +128,14 @@ async function extrairPilotosDaImagem(file, onProgress, opcoes = {}) {
   return filtrarPilotos(lines);
 }
 
-function carregarPreviewImagem(file) {
-  return new Promise((resolve, reject) => {
-    const leitor = new FileReader();
-    leitor.onload = () => resolve(leitor.result);
-    leitor.onerror = reject;
-    leitor.readAsDataURL(file);
-  });
+async function prepararPreview(file) {
+  return preprocessarImagem(file, 1, 1);
 }
 
 window.OcrKart = {
   extrairPilotosDaImagem,
   filtrarPilotos,
   preprocessarImagem,
-  carregarPreviewImagem,
+  prepararPreview,
+  mensagemErroImagem,
 };
