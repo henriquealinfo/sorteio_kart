@@ -211,6 +211,11 @@ textarea:focus {
   pointer-events: none;
 }
 
+.install-steps p {
+  margin: 0 0 12px;
+  line-height: 1.5;
+}
+
 .dialog {
   border: none;
   border-radius: 18px;

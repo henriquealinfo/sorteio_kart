@@ -30,6 +30,9 @@
         <button id="btn-install" class="btn btn-ghost hidden" type="button">
           Instalar
         </button>
+        <button id="btn-como-instalar" class="btn btn-ghost" type="button">
+          Como instalar
+        </button>
       </header>
 
       <section class="card">
@@ -114,6 +117,23 @@
           <button id="btn-confirmar-import" class="btn btn-primary" value="confirm" type="submit">
             Confirmar
           </button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dialog-instalar" class="dialog">
+      <form method="dialog" class="dialog-content">
+        <h3>Instalar no celular</h3>
+        <p class="hint">
+          O botão automático de instalação pode não aparecer de novo depois que você
+          desinstala o app. Isso é normal — use o método manual abaixo.
+        </p>
+        <div class="install-steps">
+          <p><strong>Android (Chrome):</strong> menu ⋮ → Instalar app ou Adicionar à tela inicial.</p>
+          <p><strong>iPhone (Safari):</strong> Compartilhar → Adicionar à Tela de Início.</p>
+        </div>
+        <div class="dialog-actions">
+          <button class="btn btn-primary" value="close" type="submit">Entendi</button>
         </div>
       </form>
     </dialog>

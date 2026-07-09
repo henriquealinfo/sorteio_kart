@@ -191,6 +191,19 @@ function registrarServiceWorker() {
 }
 
 function configurarInstalacaoPwa() {
+  const dialogInstalarEl = document.getElementById("dialog-instalar");
+  const btnComoInstalarEl = document.getElementById("btn-como-instalar");
+  const appInstalado =
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+
+  if (appInstalado) {
+    btnComoInstalarEl.classList.add("hidden");
+  }
+
+  btnComoInstalarEl.addEventListener("click", () => {
+    dialogInstalarEl.showModal();
+  });
+
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
