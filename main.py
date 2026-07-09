@@ -128,6 +128,18 @@ class SorteioKartApp:
         raw = text_widget.get("1.0", tk.END)
         return [line.strip() for line in raw.splitlines() if line.strip()]
 
+    def _encontrar_duplicados(self, itens: list[str]) -> list[str]:
+        contagem: dict[str, int] = {}
+        for item in itens:
+            contagem[item] = contagem.get(item, 0) + 1
+        return [item for item, quantidade in contagem.items() if quantidade > 1]
+
+    def _mensagem_karts_minimos(self, quantidade_pilotos: int) -> str:
+        return (
+            f"Total de {quantidade_pilotos} piloto(s) na lista. "
+            f"Adicione no mínimo {quantidade_pilotos} kart(s) para realizar o sorteio."
+        )
+
     def _sortear(self) -> None:
         pilotos = self._ler_linhas(self.pilotos_text)
         karts = self._ler_linhas(self.karts_text)
@@ -138,6 +150,15 @@ class SorteioKartApp:
 
         if not karts:
             messagebox.showwarning("Atenção", "Informe pelo menos um kart.")
+            return
+
+        karts_duplicados = self._encontrar_duplicados(karts)
+        if karts_duplicados:
+            messagebox.showerror(
+                "Erro",
+                f"Os seguintes karts estão repetidos: {', '.join(karts_duplicados)}.\n"
+                "Cada kart deve aparecer apenas uma vez.",
+            )
             return
 
         if len(pilotos) > len(karts):
@@ -306,7 +327,13 @@ class SorteioKartApp:
                 self.pilotos_text.delete("1.0", tk.END)
                 self.pilotos_text.insert("1.0", conteudo)
 
-            self.status.config(text=f"{len(linhas)} piloto(s) importado(s) do print.")
+            total_pilotos = len(self._ler_linhas(self.pilotos_text))
+            mensagem = (
+                f"{len(linhas)} piloto(s) importado(s) do print.\n\n"
+                f"{self._mensagem_karts_minimos(total_pilotos)}"
+            )
+            messagebox.showinfo("Pilotos importados", mensagem, parent=janela)
+            self.status.config(text=self._mensagem_karts_minimos(total_pilotos))
             janela.destroy()
 
         ttk.Button(botoes, text="Confirmar", command=confirmar).pack(side=tk.RIGHT)

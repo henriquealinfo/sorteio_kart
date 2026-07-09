@@ -24,6 +24,22 @@ function lerLinhas(textarea) {
     .filter(Boolean);
 }
 
+function encontrarDuplicados(itens) {
+  const contagem = new Map();
+
+  for (const item of itens) {
+    contagem.set(item, (contagem.get(item) || 0) + 1);
+  }
+
+  return [...contagem.entries()]
+    .filter(([, quantidade]) => quantidade > 1)
+    .map(([item]) => item);
+}
+
+function mensagemKartsMinimos(quantidadePilotos) {
+  return `Total de ${quantidadePilotos} piloto(s) na lista. Adicione no mínimo ${quantidadePilotos} kart(s) para realizar o sorteio.`;
+}
+
 function definirStatus(texto) {
   statusEl.textContent = texto;
 }
@@ -112,6 +128,15 @@ function sortear() {
     return;
   }
 
+  const kartsDuplicados = encontrarDuplicados(karts);
+  if (kartsDuplicados.length) {
+    window.alert(
+      `Os seguintes karts estão repetidos: ${kartsDuplicados.join(", ")}.\n` +
+        "Cada kart deve aparecer apenas uma vez."
+    );
+    return;
+  }
+
   if (pilotos.length > karts.length) {
     window.alert(
       `Há ${pilotos.length} pilotos e apenas ${karts.length} karts.\nAdicione mais karts ou remova pilotos.`
@@ -162,7 +187,10 @@ function aplicarImportacao() {
     pilotosEl.value = atual ? `${atual}\n${linhas.join("\n")}\n` : `${linhas.join("\n")}\n`;
   }
 
-  definirStatus(`${linhas.length} piloto(s) importado(s) do print.`);
+  const totalPilotos = lerLinhas(pilotosEl).length;
+  const mensagem = `${linhas.length} piloto(s) importado(s) do print.\n\n${mensagemKartsMinimos(totalPilotos)}`;
+  window.alert(mensagem);
+  definirStatus(mensagemKartsMinimos(totalPilotos));
 }
 
 async function processarImagem(file) {
