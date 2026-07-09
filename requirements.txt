@@ -1,0 +1,2 @@
+clipocr>=0.1.0
+pillow>=9.0
