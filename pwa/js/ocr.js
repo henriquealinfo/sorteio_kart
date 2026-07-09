@@ -63,9 +63,47 @@ function carregarImagemViaElemento(file) {
   });
 }
 
+function extrairLinhasOrdenadas(data) {
+  const itens = [];
+
+  if (data.lines?.length) {
+    for (const line of data.lines) {
+      const texto = line.text?.trim();
+      if (!texto) continue;
+      itens.push({
+        texto,
+        y: line.bbox.y0,
+        x: line.bbox.x0,
+        h: line.bbox.y1 - line.bbox.y0,
+      });
+    }
+  }
+
+  if (!itens.length && data.text) {
+    return data.text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+  }
+
+  if (!itens.length) return [];
+
+  const alturaMedia = itens.reduce((soma, item) => soma + item.h, 0) / itens.length;
+  const tolerancia = Math.max(12, alturaMedia * 0.6);
+
+  itens.sort((a, b) => {
+    if (Math.abs(a.y - b.y) <= tolerancia) return a.x - b.x;
+    return a.y - b.y;
+  });
+
+  return itens.map((item) => item.texto);
+}
+
 async function carregarFonteImagem(file) {
+  const opcoesBitmap = { imageOrientation: "from-image" };
+
   try {
-    const bitmap = await createImageBitmap(file);
+    const bitmap = await createImageBitmap(file, opcoesBitmap);
     return { fonte: bitmap, fechar: () => bitmap.close?.() };
   } catch {
     const img = await carregarImagemViaElemento(file);
@@ -120,10 +158,7 @@ async function extrairPilotosDaImagem(file, onProgress, opcoes = {}) {
     },
   });
 
-  const lines = data.text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
+  const lines = extrairLinhasOrdenadas(data);
 
   return filtrarPilotos(lines);
 }

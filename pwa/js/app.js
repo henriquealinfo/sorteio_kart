@@ -264,8 +264,7 @@ async function processarOcrComAjustes() {
     console.error(erro);
   } finally {
     arquivoOcrPendente = null;
-    document.getElementById("input-camera").value = "";
-    document.getElementById("input-galeria").value = "";
+    limparInputsImagem();
   }
 }
 
@@ -286,8 +285,7 @@ async function prepararOcr(file) {
     ocrPreviewCanvas = null;
     window.alert(window.OcrKart.mensagemErroImagem(erro, file));
     console.error(erro);
-    document.getElementById("input-camera").value = "";
-    document.getElementById("input-galeria").value = "";
+    limparInputsImagem();
   }
 }
 
@@ -405,8 +403,22 @@ function configurarAutoSave() {
   });
 }
 
-function configurarImportacaoImagem(inputEl) {
-  inputEl.addEventListener("change", (e) => prepararOcr(e.target.files?.[0]));
+function limparInputsImagem() {
+  document.querySelectorAll("[data-import-file]").forEach((input) => {
+    input.value = "";
+  });
+}
+
+function configurarImportacaoImagem() {
+  document.querySelectorAll("[data-import-file]").forEach((input) => {
+    input.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      dialogImportarEl.close();
+      prepararOcr(file);
+    });
+    input.addEventListener("cancel", () => dialogImportarEl.close());
+  });
 }
 
 function configurarSheets() {
@@ -420,20 +432,20 @@ function configurarSheets() {
 
   document.querySelectorAll("[data-import]").forEach((btn) => {
     btn.addEventListener("click", () => {
-      dialogImportarEl.close();
       const tipo = btn.dataset.import;
-      if (tipo === "camera") {
-        document.getElementById("input-camera").value = "";
-        document.getElementById("input-camera").click();
-      } else if (tipo === "galeria") {
-        document.getElementById("input-galeria").value = "";
-        document.getElementById("input-galeria").click();
-      } else if (tipo === "colar") {
+      if (tipo === "colar") {
+        dialogImportarEl.close();
         dialogColarEl.showModal();
       } else if (tipo === "csv") {
-        document.getElementById("input-csv").click();
+        const input = document.getElementById("input-csv");
+        input.value = "";
+        input.click();
+        dialogImportarEl.close();
       } else if (tipo === "excel") {
-        document.getElementById("input-excel").click();
+        const input = document.getElementById("input-excel");
+        input.value = "";
+        input.click();
+        dialogImportarEl.close();
       }
     });
   });
@@ -577,8 +589,7 @@ document.getElementById("btn-ocr-confirmar").addEventListener("click", processar
 document.getElementById("ocr-brightness").addEventListener("input", atualizarCanvasOcr);
 document.getElementById("ocr-contrast").addEventListener("input", atualizarCanvasOcr);
 
-configurarImportacaoImagem(document.getElementById("input-camera"));
-configurarImportacaoImagem(document.getElementById("input-galeria"));
+configurarImportacaoImagem();
 configurarSheets();
 configurarAutoSave();
 configurarInstalacaoPwa();

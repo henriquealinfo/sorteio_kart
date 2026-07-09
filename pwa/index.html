@@ -82,8 +82,16 @@
       <div class="dialog-content">
         <h3>Importar pilotos</h3>
         <div class="sheet-grid">
-          <button class="sheet-item" data-import="camera" type="button"><span>📷</span>Câmera</button>
-          <button class="sheet-item" data-import="galeria" type="button"><span>🖼</span>Galeria</button>
+          <label class="sheet-item sheet-item-file">
+            <input type="file" accept="image/*" capture="environment" data-import-file="camera" />
+            <span class="sheet-item-icon">📷</span>
+            <span class="sheet-item-text">Câmera</span>
+          </label>
+          <label class="sheet-item sheet-item-file">
+            <input type="file" accept="image/*" data-import-file="galeria" />
+            <span class="sheet-item-icon">🖼</span>
+            <span class="sheet-item-text">Galeria</span>
+          </label>
           <button class="sheet-item" data-import="colar" type="button"><span>📋</span>Colar</button>
           <button class="sheet-item" data-import="csv" type="button"><span>📄</span>CSV</button>
           <button class="sheet-item" data-import="excel" type="button"><span>📊</span>Excel</button>
@@ -191,8 +199,6 @@
       <div id="apresentacao-linhas" class="apresentacao-linhas"></div>
     </div>
 
-    <input id="input-camera" class="file-input-overlay" type="file" accept="image/*" capture="environment" tabindex="-1" />
-    <input id="input-galeria" class="file-input-overlay" type="file" accept="image/*" tabindex="-1" />
     <input id="input-csv" class="file-input-overlay" type="file" accept=".csv,.txt,text/csv" tabindex="-1" />
     <input id="input-excel" class="file-input-overlay" type="file" accept=".xlsx,.xls" tabindex="-1" />
 
