@@ -146,6 +146,15 @@ textarea:focus {
   border: 1px solid var(--border);
 }
 
+.btn-whatsapp {
+  background: #25d366;
+  color: white;
+}
+
+.btn-whatsapp:hover {
+  background: #1ebe57;
+}
+
 .btn-ghost {
   background: transparent;
   color: var(--text);

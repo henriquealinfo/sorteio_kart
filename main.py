@@ -1,7 +1,9 @@
 import random
 import threading
 import tkinter as tk
+import webbrowser
 from tkinter import filedialog, messagebox, ttk
+from urllib.parse import quote
 
 from ocr_utils import extrair_pilotos_da_area_transferencia, extrair_pilotos_de_arquivo
 
@@ -13,6 +15,7 @@ class SorteioKartApp:
         self.root.geometry("900x600")
         self.root.minsize(800, 500)
 
+        self.atribuicoes: list[tuple[str, str]] = []
         self._build_ui()
 
     def _build_ui(self) -> None:
@@ -47,6 +50,17 @@ class SorteioKartApp:
 
         result_frame = ttk.LabelFrame(main, text="Resultado do sorteio", padding=12)
         result_frame.pack(fill=tk.BOTH, expand=True)
+
+        result_actions = ttk.Frame(result_frame)
+        result_actions.pack(fill=tk.X, pady=(0, 8))
+
+        self.btn_whatsapp = ttk.Button(
+            result_actions,
+            text="Enviar para WhatsApp",
+            command=self._exportar_whatsapp,
+            state=tk.DISABLED,
+        )
+        self.btn_whatsapp.pack(side=tk.RIGHT)
 
         self.result_tree = ttk.Treeview(
             result_frame,
@@ -150,19 +164,39 @@ class SorteioKartApp:
             self.status.config(text=f"Sorteio concluído: {len(pilotos)} piloto(s) atribuído(s).")
 
     def _exibir_resultado(self, atribuicoes: list[tuple[str, str]]) -> None:
+        self.atribuicoes = atribuicoes
+
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
 
         for piloto, kart in atribuicoes:
             self.result_tree.insert("", tk.END, values=(piloto, kart))
 
+        self.btn_whatsapp.config(state=tk.NORMAL)
+
+    def _formatar_mensagem_whatsapp(self, atribuicoes: list[tuple[str, str]]) -> str:
+        linhas = [f"• {piloto} → Kart {kart}" for piloto, kart in atribuicoes]
+        return "🏁 *Resultado do Sorteio de Kart*\n\n" + "\n".join(linhas)
+
+    def _exportar_whatsapp(self) -> None:
+        if not self.atribuicoes:
+            messagebox.showwarning("Atenção", "Realize um sorteio antes de exportar.")
+            return
+
+        mensagem = self._formatar_mensagem_whatsapp(self.atribuicoes)
+        url = f"https://wa.me/?text={quote(mensagem)}"
+        webbrowser.open(url)
+        self.status.config(text="Abrindo WhatsApp...")
+
     def _limpar(self) -> None:
         self.pilotos_text.delete("1.0", tk.END)
         self.karts_text.delete("1.0", tk.END)
+        self.atribuicoes = []
 
         for item in self.result_tree.get_children():
             self.result_tree.delete(item)
 
+        self.btn_whatsapp.config(state=tk.DISABLED)
         self.status.config(text="Listas e resultado limpos.")
 
     def _importar_pilotos_de_arquivo(self) -> None:

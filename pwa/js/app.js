@@ -12,8 +12,10 @@ const previewInfoEl = document.getElementById("preview-info");
 const loadingEl = document.getElementById("loading");
 const loadingTextEl = document.getElementById("loading-text");
 const btnInstallEl = document.getElementById("btn-install");
+const btnWhatsappEl = document.getElementById("btn-whatsapp");
 
 let deferredInstallPrompt = null;
+let ultimasAtribuicoes = [];
 
 function lerLinhas(textarea) {
   return textarea.value
@@ -45,6 +47,7 @@ function embaralhar(lista) {
 }
 
 function exibirResultado(atribuicoes) {
+  ultimasAtribuicoes = atribuicoes;
   resultadoLinhasEl.innerHTML = "";
 
   for (const [piloto, kart] of atribuicoes) {
@@ -56,12 +59,43 @@ function exibirResultado(atribuicoes) {
 
   resultadoVazioEl.classList.add("hidden");
   resultadoTabelaEl.classList.remove("hidden");
+  btnWhatsappEl.classList.remove("hidden");
 }
 
 function limparResultado() {
+  ultimasAtribuicoes = [];
   resultadoLinhasEl.innerHTML = "";
   resultadoTabelaEl.classList.add("hidden");
   resultadoVazioEl.classList.remove("hidden");
+  btnWhatsappEl.classList.add("hidden");
+}
+
+function formatarMensagemWhatsApp(atribuicoes) {
+  const linhas = atribuicoes.map(([piloto, kart]) => `• ${piloto} → Kart ${kart}`);
+  return `🏁 *Resultado do Sorteio de Kart*\n\n${linhas.join("\n")}`;
+}
+
+async function exportarParaWhatsApp() {
+  if (!ultimasAtribuicoes.length) {
+    window.alert("Realize um sorteio antes de exportar.");
+    return;
+  }
+
+  const mensagem = formatarMensagemWhatsApp(ultimasAtribuicoes);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({ text: mensagem });
+      definirStatus("Resultado compartilhado.");
+      return;
+    } catch (erro) {
+      if (erro.name === "AbortError") return;
+    }
+  }
+
+  const url = `https://wa.me/?text=${encodeURIComponent(mensagem)}`;
+  window.open(url, "_blank", "noopener,noreferrer");
+  definirStatus("Abrindo WhatsApp...");
 }
 
 function sortear() {
@@ -226,6 +260,7 @@ function configurarInstalacaoPwa() {
 
 document.getElementById("btn-sortear").addEventListener("click", sortear);
 document.getElementById("btn-limpar").addEventListener("click", limparTudo);
+btnWhatsappEl.addEventListener("click", exportarParaWhatsApp);
 configurarImportacaoImagem(
   document.getElementById("input-camera"),
   btnCameraEl,
