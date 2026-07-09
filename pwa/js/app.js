@@ -12,7 +12,9 @@ const resultadoTabelaEl = document.getElementById("resultado-tabela");
 const resultadoLinhasEl = document.getElementById("resultado-linhas");
 const resultadoActionsEl = document.getElementById("resultado-actions");
 const seedInfoEl = document.getElementById("seed-info");
-const btnRepescarEl = document.getElementById("btn-repescar");
+const statusEventoEl = document.getElementById("status-evento");
+const dialogImportarEl = document.getElementById("dialog-importar");
+const dialogMenuEl = document.getElementById("dialog-menu");
 const dialogPreviewEl = document.getElementById("dialog-preview");
 const dialogColarEl = document.getElementById("dialog-colar");
 const dialogOcrEl = document.getElementById("dialog-ocr");
@@ -80,13 +82,18 @@ function carregarEventoAtivoNaTela() {
 function atualizarSelectEventos() {
   const valorAtual = dados.eventoAtivo;
   selectEventoEl.innerHTML = "";
+  let nomeAtivo = "";
   for (const evento of Object.values(dados.eventos)) {
     const opt = document.createElement("option");
     opt.value = evento.id;
     opt.textContent = evento.nome;
-    if (evento.id === valorAtual) opt.selected = true;
+    if (evento.id === valorAtual) {
+      opt.selected = true;
+      nomeAtivo = evento.nome;
+    }
     selectEventoEl.appendChild(opt);
   }
+  if (statusEventoEl) statusEventoEl.textContent = nomeAtivo || "Evento";
 }
 
 function exibirResultado(atribuicoes, seed) {
@@ -104,8 +111,7 @@ function exibirResultado(atribuicoes, seed) {
   resultadoVazioEl.classList.add("hidden");
   resultadoTabelaEl.classList.remove("hidden");
   resultadoActionsEl.classList.remove("hidden");
-  btnRepescarEl.classList.remove("hidden");
-  seedInfoEl.textContent = `Código de auditoria: ${seed} — ${Core.formatarDataHora()}`;
+  seedInfoEl.textContent = `Código ${seed} · ${Core.formatarDataHora()}`;
   seedInfoEl.classList.remove("hidden");
 }
 
@@ -116,7 +122,6 @@ function limparResultado() {
   resultadoTabelaEl.classList.add("hidden");
   resultadoVazioEl.classList.remove("hidden");
   resultadoActionsEl.classList.add("hidden");
-  btnRepescarEl.classList.add("hidden");
   seedInfoEl.classList.add("hidden");
 }
 
@@ -151,6 +156,7 @@ function sortear() {
       : `Sorteio concluído: ${form.pilotos.length} piloto(s) atribuído(s).`
   );
   salvarAutomatico();
+  resultadoTabelaEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
 function abrirRepescagem() {
@@ -362,13 +368,46 @@ function configurarAutoSave() {
   });
 }
 
-function configurarImportacaoImagem(inputEl, botaoEl, msg) {
-  botaoEl.addEventListener("click", () => {
-    definirStatus(msg);
-    inputEl.value = "";
-    inputEl.click();
-  });
+function configurarImportacaoImagem(inputEl) {
   inputEl.addEventListener("change", (e) => prepararOcr(e.target.files?.[0]));
+}
+
+function configurarSheets() {
+  document.getElementById("btn-importar").addEventListener("click", () => {
+    dialogImportarEl.showModal();
+  });
+
+  document.querySelectorAll("[data-close-sheet]").forEach((btn) => {
+    btn.addEventListener("click", () => dialogImportarEl.close());
+  });
+
+  document.querySelectorAll("[data-import]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      dialogImportarEl.close();
+      const tipo = btn.dataset.import;
+      if (tipo === "camera") {
+        document.getElementById("input-camera").value = "";
+        document.getElementById("input-camera").click();
+      } else if (tipo === "galeria") {
+        document.getElementById("input-galeria").value = "";
+        document.getElementById("input-galeria").click();
+      } else if (tipo === "colar") {
+        dialogColarEl.showModal();
+      } else if (tipo === "csv") {
+        document.getElementById("input-csv").click();
+      } else if (tipo === "excel") {
+        document.getElementById("input-excel").click();
+      }
+    });
+  });
+
+  document.getElementById("btn-menu").addEventListener("click", () => {
+    dialogMenuEl.showModal();
+  });
+
+  document.querySelectorAll("[data-close-menu]").forEach((btn) => {
+    btn.addEventListener("click", () => dialogMenuEl.close());
+  });
 }
 
 function configurarInstalacaoPwa() {
@@ -377,6 +416,7 @@ function configurarInstalacaoPwa() {
   if (appInstalado) document.getElementById("btn-como-instalar").classList.add("hidden");
 
   document.getElementById("btn-como-instalar").addEventListener("click", () => {
+    dialogMenuEl.close();
     document.getElementById("dialog-instalar").showModal();
   });
 
@@ -388,6 +428,7 @@ function configurarInstalacaoPwa() {
 
   document.getElementById("btn-install").addEventListener("click", async () => {
     if (!deferredInstallPrompt) return;
+    dialogMenuEl.close();
     deferredInstallPrompt.prompt();
     await deferredInstallPrompt.userChoice;
     deferredInstallPrompt = null;
@@ -406,7 +447,7 @@ function registrarServiceWorker() {
 // Event listeners
 document.getElementById("btn-sortear").addEventListener("click", sortear);
 document.getElementById("btn-limpar").addEventListener("click", limparTudo);
-document.getElementById("btn-repescar").addEventListener("click", abrirRepescagem);
+document.getElementById("btn-repescar-inline").addEventListener("click", abrirRepescagem);
 document.getElementById("btn-whatsapp").addEventListener("click", async () => {
   const evento = Storage.eventoAtivo(dados);
   await Export.exportarWhatsApp(ultimasAtribuicoes, ultimoSeed, evento?.nome);
@@ -422,12 +463,10 @@ document.getElementById("btn-fechar-apresentacao").addEventListener("click", () 
   document.getElementById("apresentacao").classList.add("hidden");
 });
 
-document.getElementById("btn-colar").addEventListener("click", () => dialogColarEl.showModal());
-document.getElementById("btn-csv").addEventListener("click", () => document.getElementById("input-csv").click());
-document.getElementById("btn-excel").addEventListener("click", () => document.getElementById("input-excel").click());
-document.getElementById("input-csv").addEventListener("change", (e) =>
-  importarArquivoTexto(e.target.files?.[0], Core.parseCsvConteudo)
-);
+document.getElementById("input-csv").addEventListener("change", (e) => {
+  importarArquivoTexto(e.target.files?.[0], Core.parseCsvConteudo);
+  e.target.value = "";
+});
 document.getElementById("input-excel").addEventListener("change", (e) => {
   importarExcel(e.target.files?.[0]);
   e.target.value = "";
@@ -437,6 +476,7 @@ document.getElementById("btn-tema").addEventListener("click", () => {
   dados.tema = dados.tema === "dark" ? "light" : "dark";
   aplicarTema(dados.tema);
   Storage.salvar(dados);
+  dialogMenuEl.close();
 });
 
 document.getElementById("btn-novo-evento").addEventListener("click", () => {
@@ -499,12 +539,13 @@ document.getElementById("btn-ocr-confirmar").addEventListener("click", processar
 document.getElementById("ocr-brightness").addEventListener("input", atualizarCanvasOcr);
 document.getElementById("ocr-contrast").addEventListener("input", atualizarCanvasOcr);
 
-configurarImportacaoImagem(document.getElementById("input-camera"), document.getElementById("btn-camera"), "Abrindo câmera...");
-configurarImportacaoImagem(document.getElementById("input-galeria"), document.getElementById("btn-galeria"), "Abrindo galeria...");
+configurarImportacaoImagem(document.getElementById("input-camera"));
+configurarImportacaoImagem(document.getElementById("input-galeria"));
+configurarSheets();
 configurarAutoSave();
 configurarInstalacaoPwa();
 registrarServiceWorker();
 
 aplicarTema(dados.tema || "dark");
 carregarEventoAtivoNaTela();
-definirStatus("Pronto para sortear. Dados salvos automaticamente.");
+definirStatus("Pronto para sortear.");
