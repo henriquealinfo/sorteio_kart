@@ -1,4 +1,4 @@
-const CACHE_NAME = "sorteio-kart-v2";
+const CACHE_NAME = "sorteio-kart-v3";
 const ASSETS = [
   "./",
   "./index.html",

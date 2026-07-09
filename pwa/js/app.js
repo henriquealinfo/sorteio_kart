@@ -4,8 +4,8 @@ const statusEl = document.getElementById("status");
 const resultadoVazioEl = document.getElementById("resultado-vazio");
 const resultadoTabelaEl = document.getElementById("resultado-tabela");
 const resultadoLinhasEl = document.getElementById("resultado-linhas");
-const inputCameraEl = document.getElementById("input-camera");
-const inputGaleriaEl = document.getElementById("input-galeria");
+const btnCameraEl = document.getElementById("btn-camera");
+const btnGaleriaEl = document.getElementById("btn-galeria");
 const dialogPreviewEl = document.getElementById("dialog-preview");
 const previewPilotosEl = document.getElementById("preview-pilotos");
 const previewInfoEl = document.getElementById("preview-info");
@@ -158,15 +158,25 @@ async function processarImagem(file) {
     definirStatus("Falha ao ler o print.");
     console.error(error);
   } finally {
-    inputCameraEl.value = "";
-    inputGaleriaEl.value = "";
+    document.getElementById("input-camera").value = "";
+    document.getElementById("input-galeria").value = "";
   }
 }
 
-function configurarImportacaoImagem(inputEl) {
+function configurarImportacaoImagem(inputEl, botaoEl, mensagemStatus) {
+  botaoEl.addEventListener("click", () => {
+    definirStatus(mensagemStatus);
+    inputEl.value = "";
+    inputEl.click();
+  });
+
   inputEl.addEventListener("change", (event) => {
     const file = event.target.files?.[0];
     processarImagem(file);
+  });
+
+  inputEl.addEventListener("cancel", () => {
+    definirStatus("Seleção de imagem cancelada.");
   });
 }
 
@@ -203,8 +213,16 @@ function configurarInstalacaoPwa() {
 
 document.getElementById("btn-sortear").addEventListener("click", sortear);
 document.getElementById("btn-limpar").addEventListener("click", limparTudo);
-configurarImportacaoImagem(inputCameraEl);
-configurarImportacaoImagem(inputGaleriaEl);
+configurarImportacaoImagem(
+  document.getElementById("input-camera"),
+  btnCameraEl,
+  "Abrindo câmera..."
+);
+configurarImportacaoImagem(
+  document.getElementById("input-galeria"),
+  btnGaleriaEl,
+  "Abrindo galeria..."
+);
 
 dialogPreviewEl.addEventListener("close", () => {
   if (dialogPreviewEl.returnValue === "confirm") {
