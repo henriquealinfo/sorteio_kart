@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1a2e" />
-    <meta
-      name="description"
-      content="Sorteio aleatório de karts para pilotos de kart"
-    />
+    <meta name="description" content="Sorteio aleatório de karts para pilotos de kart" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Sorteio Kart" />
@@ -27,70 +21,69 @@
           <h1>Sorteio Kart</h1>
           <p>Atribua karts aos pilotos de forma aleatória</p>
         </div>
-        <button id="btn-install" class="btn btn-ghost hidden" type="button">
-          Instalar
-        </button>
-        <button id="btn-como-instalar" class="btn btn-ghost" type="button">
-          Como instalar
-        </button>
+        <div class="header-actions">
+          <button id="btn-tema" class="btn btn-ghost" type="button" title="Alternar tema">🌓</button>
+          <button id="btn-install" class="btn btn-ghost hidden" type="button">Instalar</button>
+          <button id="btn-como-instalar" class="btn btn-ghost" type="button">Como instalar</button>
+        </div>
       </header>
+
+      <section class="card toolbar">
+        <label class="field-label" for="select-evento">Evento</label>
+        <div class="toolbar-row">
+          <select id="select-evento" class="select-input"></select>
+          <button id="btn-novo-evento" class="btn btn-secondary" type="button">Novo</button>
+          <button id="btn-remover-evento" class="btn btn-secondary" type="button">Excluir</button>
+          <button id="btn-historico" class="btn btn-secondary" type="button">Histórico</button>
+        </div>
+      </section>
 
       <section class="card">
         <div class="card-header">
           <h2>Pilotos</h2>
           <div class="card-actions">
-            <button id="btn-camera" class="btn btn-secondary" type="button">
-              Câmera
-            </button>
-            <button id="btn-galeria" class="btn btn-secondary" type="button">
-              Galeria
-            </button>
+            <button id="btn-camera" class="btn btn-secondary" type="button">Câmera</button>
+            <button id="btn-galeria" class="btn btn-secondary" type="button">Galeria</button>
+            <button id="btn-colar" class="btn btn-secondary" type="button">Colar</button>
+            <button id="btn-csv" class="btn btn-secondary" type="button">CSV</button>
+            <button id="btn-excel" class="btn btn-secondary" type="button">Excel</button>
           </div>
         </div>
-        <textarea
-          id="pilotos"
-          rows="8"
-          placeholder="Um piloto por linha&#10;João Silva&#10;Maria Santos"
-        ></textarea>
-        <p class="hint">Tire uma foto da lista ou escolha uma imagem da galeria. No iPhone, se a galeria não abrir no app instalado, use pelo Safari.</p>
+        <textarea id="pilotos" rows="8" placeholder="Um piloto por linha"></textarea>
+        <p class="hint">Importe por foto, cole texto, CSV ou Excel. Nomes duplicados são bloqueados no sorteio.</p>
       </section>
 
       <section class="card">
-        <div class="card-header">
-          <h2>Karts</h2>
-        </div>
-        <textarea
-          id="karts"
-          rows="6"
-          placeholder="Um número por linha&#10;1&#10;2&#10;3&#10;4"
-        ></textarea>
-        <p class="hint">Informe a numeração disponível dos karts.</p>
+        <div class="card-header"><h2>Karts</h2></div>
+        <textarea id="karts" rows="6" placeholder="Um número por linha"></textarea>
+        <p class="hint">Cada kart deve ser único. Listas são salvas automaticamente.</p>
       </section>
 
-      <div class="actions">
-        <button id="btn-sortear" class="btn btn-primary" type="button">
-          Sortear
-        </button>
-        <button id="btn-limpar" class="btn btn-secondary" type="button">
-          Limpar
-        </button>
+      <section class="card">
+        <div class="card-header"><h2>Karts indisponíveis</h2></div>
+        <textarea id="karts-excluidos" rows="3" placeholder="Karts fora de uso, um por linha"></textarea>
+        <p class="hint">Ex.: karts quebrados ou reservados — não entram no sorteio.</p>
+      </section>
+
+      <div class="actions actions-grid">
+        <button id="btn-sortear" class="btn btn-primary" type="button">Sortear</button>
+        <button id="btn-repescar" class="btn btn-secondary hidden" type="button">Repescar</button>
+        <button id="btn-limpar" class="btn btn-secondary" type="button">Limpar</button>
       </div>
 
       <section class="card">
         <div class="card-header">
           <h2>Resultado</h2>
-          <button id="btn-whatsapp" class="btn btn-whatsapp hidden" type="button">
-            Enviar WhatsApp
-          </button>
-        </div>
-        <div id="resultado-vazio" class="empty-state">
-          O resultado do sorteio aparecerá aqui.
-        </div>
-        <div id="resultado-tabela" class="resultado hidden">
-          <div class="resultado-header">
-            <span>Piloto</span>
-            <span>Kart</span>
+          <div class="card-actions resultado-actions hidden" id="resultado-actions">
+            <button id="btn-whatsapp" class="btn btn-whatsapp" type="button">WhatsApp</button>
+            <button id="btn-imagem" class="btn btn-secondary" type="button">Imagem</button>
+            <button id="btn-apresentacao" class="btn btn-secondary" type="button">Apresentar</button>
           </div>
+        </div>
+        <p id="seed-info" class="seed-info hidden"></p>
+        <div id="resultado-vazio" class="empty-state">O resultado do sorteio aparecerá aqui.</div>
+        <div id="resultado-tabela" class="resultado hidden">
+          <div class="resultado-header"><span>Piloto</span><span>Kart</span></div>
           <div id="resultado-linhas"></div>
         </div>
       </section>
@@ -98,28 +91,70 @@
       <p id="status" class="status">Pronto para sortear.</p>
     </div>
 
+    <!-- Dialogs -->
     <dialog id="dialog-preview" class="dialog">
       <form method="dialog" class="dialog-content">
-        <h3>Pilotos encontrados no print</h3>
+        <h3>Pilotos encontrados</h3>
         <p id="preview-info" class="hint"></p>
         <textarea id="preview-pilotos" rows="10"></textarea>
         <div class="dialog-options">
-          <label>
-            <input type="radio" name="modo-import" value="substituir" checked />
-            Substituir lista
-          </label>
-          <label>
-            <input type="radio" name="modo-import" value="adicionar" />
-            Adicionar à lista
-          </label>
+          <label><input type="radio" name="modo-import" value="substituir" checked /> Substituir lista</label>
+          <label><input type="radio" name="modo-import" value="adicionar" /> Adicionar à lista</label>
         </div>
         <div class="dialog-actions">
-          <button class="btn btn-secondary" value="cancel" type="submit">
-            Cancelar
-          </button>
-          <button id="btn-confirmar-import" class="btn btn-primary" value="confirm" type="submit">
-            Confirmar
-          </button>
+          <button class="btn btn-secondary" value="cancel" type="submit">Cancelar</button>
+          <button class="btn btn-primary" value="confirm" type="submit">Confirmar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dialog-colar" class="dialog">
+      <form method="dialog" class="dialog-content">
+        <h3>Colar lista de pilotos</h3>
+        <p class="hint">Cole nomes do WhatsApp, Excel ou qualquer texto (um por linha).</p>
+        <textarea id="colar-pilotos" rows="10" placeholder="João&#10;Maria&#10;Pedro"></textarea>
+        <div class="dialog-options">
+          <label><input type="radio" name="modo-colar" value="substituir" checked /> Substituir lista</label>
+          <label><input type="radio" name="modo-colar" value="adicionar" /> Adicionar à lista</label>
+        </div>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" value="cancel" type="submit">Cancelar</button>
+          <button class="btn btn-primary" value="confirm" type="submit">Confirmar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dialog-ocr" class="dialog dialog-wide">
+      <div class="dialog-content">
+        <h3>Ajustar imagem antes do OCR</h3>
+        <canvas id="ocr-canvas" class="ocr-canvas"></canvas>
+        <label class="field-label">Brilho <input id="ocr-brightness" type="range" min="0.5" max="2" step="0.1" value="1.1" /></label>
+        <label class="field-label">Contraste <input id="ocr-contrast" type="range" min="0.5" max="2" step="0.1" value="1.25" /></label>
+        <div class="dialog-actions">
+          <button id="btn-ocr-cancelar" class="btn btn-secondary" type="button">Cancelar</button>
+          <button id="btn-ocr-confirmar" class="btn btn-primary" type="button">Ler texto</button>
+        </div>
+      </div>
+    </dialog>
+
+    <dialog id="dialog-repescar" class="dialog">
+      <form method="dialog" class="dialog-content">
+        <h3>Repescagem</h3>
+        <p class="hint">Selecione os pilotos que devem receber um novo kart.</p>
+        <div id="repescar-lista" class="repescar-lista"></div>
+        <div class="dialog-actions">
+          <button class="btn btn-secondary" value="cancel" type="submit">Cancelar</button>
+          <button class="btn btn-primary" value="confirm" type="submit">Repescar selecionados</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="dialog-historico" class="dialog dialog-wide">
+      <form method="dialog" class="dialog-content">
+        <h3>Histórico de sorteios</h3>
+        <div id="historico-lista" class="historico-lista"></div>
+        <div class="dialog-actions">
+          <button class="btn btn-primary" value="close" type="submit">Fechar</button>
         </div>
       </form>
     </dialog>
@@ -127,13 +162,9 @@
     <dialog id="dialog-instalar" class="dialog">
       <form method="dialog" class="dialog-content">
         <h3>Instalar no celular</h3>
-        <p class="hint">
-          O botão automático de instalação pode não aparecer de novo depois que você
-          desinstala o app. Isso é normal — use o método manual abaixo.
-        </p>
         <div class="install-steps">
-          <p><strong>Android (Chrome):</strong> menu ⋮ → Instalar app ou Adicionar à tela inicial.</p>
-          <p><strong>iPhone (Safari):</strong> Compartilhar → Adicionar à Tela de Início.</p>
+          <p><strong>Android:</strong> menu ⋮ → Instalar app</p>
+          <p><strong>iPhone:</strong> Compartilhar → Adicionar à Tela de Início</p>
         </div>
         <div class="dialog-actions">
           <button class="btn btn-primary" value="close" type="submit">Entendi</button>
@@ -141,28 +172,28 @@
       </form>
     </dialog>
 
-    <input
-      id="input-camera"
-      class="file-input-overlay"
-      type="file"
-      accept="image/*"
-      capture="environment"
-      tabindex="-1"
-    />
-    <input
-      id="input-galeria"
-      class="file-input-overlay"
-      type="file"
-      accept="image/jpeg,image/png,image/webp,image/heic,image/heif,image/*"
-      tabindex="-1"
-    />
+    <div id="apresentacao" class="apresentacao hidden">
+      <button id="btn-fechar-apresentacao" class="btn btn-secondary apresentacao-fechar" type="button">Fechar</button>
+      <h2 id="apresentacao-titulo"></h2>
+      <p id="apresentacao-meta" class="apresentacao-meta"></p>
+      <div id="apresentacao-linhas" class="apresentacao-linhas"></div>
+    </div>
+
+    <input id="input-camera" class="file-input-overlay" type="file" accept="image/*" capture="environment" tabindex="-1" />
+    <input id="input-galeria" class="file-input-overlay" type="file" accept="image/*" tabindex="-1" />
+    <input id="input-csv" class="file-input-overlay" type="file" accept=".csv,.txt,text/csv" tabindex="-1" />
+    <input id="input-excel" class="file-input-overlay" type="file" accept=".xlsx,.xls" tabindex="-1" />
 
     <div id="loading" class="loading hidden" aria-live="polite">
       <div class="spinner"></div>
-      <p id="loading-text">Lendo imagem...</p>
+      <p id="loading-text">Processando...</p>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="js/core.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/export.js"></script>
     <script src="js/ocr.js"></script>
     <script src="js/app.js"></script>
   </body>

@@ -1,81 +1,80 @@
 # Sorteio de Kart
 
-Aplicativo para sortear a atribuição de karts aos pilotos de forma aleatória.
-
-Disponível em duas versões:
+Aplicativo para sortear a atribuição de karts aos pilotos de forma aleatória, com suporte a importação por OCR, múltiplos eventos, histórico e exportação para WhatsApp.
 
 | Versão | Pasta | Uso |
 |--------|-------|-----|
 | **Desktop** | `main.py` | Windows com interface gráfica (Tkinter) |
 | **PWA** | `pwa/` | Navegador e celular (instalável na tela inicial) |
 
+**Demo online:** [henriquealinfo.github.io/sorteio_kart](https://henriquealinfo.github.io/sorteio_kart/)
+
 ---
 
 ## Funcionalidades
 
-- Cadastro de **pilotos** (um nome por linha)
-- Cadastro de **karts** (um número por linha)
-- **Sorteio aleatório** com atribuição 1 piloto → 1 kart
-- **Importação de pilotos por OCR** (leitura de print/foto)
-- **Exportação do resultado para WhatsApp**
+### Sorteio
+- Atribuição aleatória 1 piloto → 1 kart
+- Validação de **pilotos duplicados**
 - Validação de **karts duplicados**
-- Aviso da **quantidade mínima de karts** após importar pilotos
+- **Karts indisponíveis** (excluídos do sorteio)
+- **Código de auditoria** (seed) em cada sorteio
+- **Repescagem** para pilotos selecionados
+- **Histórico** dos últimos 50 sorteios
+
+### Importação de pilotos
+- Digitação manual
+- **OCR** por foto/print (câmera, galeria ou arquivo)
+- Ajuste de **brilho e contraste** antes do OCR (PWA)
+- **Colar lista** de texto
+- Importação **CSV** e **Excel**
+- Correção automática de nomes comuns (Joao → João)
+- Aviso da **quantidade mínima de karts** após importar
+
+### Exportação e apresentação
+- **WhatsApp** com data/hora e código de auditoria
+- **Imagem PNG** do resultado
+- **Modo apresentação** (tela cheia para TV/projetor)
+
+### Organização
+- **Múltiplos eventos** salvos (ex.: Corrida 1, Corrida 2)
+- **Salvamento automático** das listas
+- **Tema claro/escuro**
 
 ---
 
 ## Regras do sorteio
 
-- É necessário ter pelo menos **1 piloto** e **1 kart**
-- Cada número de kart deve ser **único** (não pode repetir)
-- O número de pilotos **não pode ser maior** que o número de karts
-- Se houver mais karts do que pilotos, os karts extras ficam sem uso
-- Cada clique em **Sortear** gera um novo embaralhamento aleatório
+- Pelo menos **1 piloto** e **1 kart**
+- Pilotos e karts devem ser **únicos** (sem repetição)
+- Pilotos ≤ karts disponíveis (total menos excluídos)
+- Karts excluídos não entram no sorteio
+- Karts extras ficam sem uso se sobrar
 
 ---
 
-## Versão desktop (Python)
-
-### Requisitos
-
-- Python 3.10 ou superior
-- Windows
+## Versão desktop
 
 ### Instalação
 
 ```bash
 pip install -r requirements.txt
-```
-
-### Executar
-
-```bash
 python main.py
 ```
 
-### Como usar
+### Dependências
 
-1. Na coluna **Pilotos**, informe um nome por linha **ou importe de um print**:
-   - **Ler print da área de transferência** — capture com `Win + Shift + S`, copie a imagem e clique no botão
-   - **Ler print de arquivo** — selecione uma imagem salva no computador
-2. Na coluna **Karts**, informe um número por linha (sem repetir)
-3. Clique em **Sortear**
-4. Opcionalmente, clique em **Enviar para WhatsApp** para compartilhar o resultado
+| Pacote | Uso |
+|--------|-----|
+| `clipocr` | OCR de prints |
+| `pillow` | Imagens e exportação PNG |
+| `openpyxl` | Importar Excel (opcional) |
 
-> Na primeira leitura de print, o app pode baixar o modelo de OCR (~15 MB). Isso acontece apenas uma vez.
+Dados salvos em `dados_sorteio.json` na pasta do projeto.
 
 ---
 
 ## Versão PWA (celular)
-
-A pasta `pwa/` contém a versão web instalável no celular.
-
-### Funcionalidades no celular
-
-- Lista de pilotos e karts
-- Sorteio aleatório
-- Leitura de print por **câmera** ou **galeria**
-- Envio do resultado para **WhatsApp**
-- Instalação como app na tela inicial
 
 ### Testar localmente
 
@@ -84,89 +83,23 @@ cd pwa
 python -m http.server 8080
 ```
 
-Abra [http://localhost:8080](http://localhost:8080) no navegador.
+### Publicar no GitHub Pages
 
-### Como usar no celular
-
-1. Informe os pilotos manualmente **ou** importe de um print:
-   - **Câmera** — tire uma foto da lista
-   - **Galeria** — escolha uma imagem salva
-2. Revise os nomes na tela de confirmação
-3. Após importar, o app informa quantos karts são necessários
-4. Informe os números dos karts (sem repetir)
-5. Toque em **Sortear**
-6. Toque em **Enviar WhatsApp** para compartilhar o resultado
-
-> Na primeira leitura, o navegador baixa o motor de OCR (precisa de internet). Depois disso, o sorteio funciona offline.
-
-### Instalar no celular
-
-O site precisa estar em **HTTPS** para instalação como app.
-
-**Android (Chrome):**
-
-1. Abra o site publicado
-2. Toque em **Instalar** ou no menu ⋮ → **Instalar app** / **Adicionar à tela inicial**
-3. Se o botão automático não aparecer, use **Como instalar** no app
-
-**iPhone (Safari):**
-
-1. Abra o site publicado no **Safari**
-2. Toque em **Compartilhar** → **Adicionar à Tela de Início**
-
-> No iPhone, se a galeria não abrir no app instalado, abra o link diretamente pelo Safari.
-
----
-
-## Publicar no GitHub Pages
-
-O projeto inclui o workflow em `.github/workflows/deploy-pages.yml` para publicação automática.
-
-### 1. Criar o repositório
-
-1. Acesse [github.com/new](https://github.com/new)
-2. Nome sugerido: `Sorteio_kart`
-3. Deixe **público** (necessário no plano gratuito)
-4. **Não** marque "Add a README"
-5. Clique em **Create repository**
-
-### 2. Enviar o código
-
-```bash
-cd "C:\Users\Henrique\Documents\Python\Sorteio_kart"
-
-git init
-git add .
-git commit -m "Publicar sorteio de kart com PWA"
-git branch -M main
-git remote add origin https://github.com/SEU_USUARIO/Sorteio_kart.git
-git push -u origin main
-```
-
-Substitua `SEU_USUARIO` pelo seu usuário do GitHub.
-
-### 3. Ativar o GitHub Pages
-
-1. No repositório → **Settings** → **Pages**
-2. Em **Source**, escolha **GitHub Actions**
-3. Aguarde o workflow **Deploy PWA no GitHub Pages** terminar (aba **Actions**)
-4. O link aparecerá em **Settings → Pages**
-
-Exemplo de URL:
-
-```
-https://SEU_USUARIO.github.io/Sorteio_kart/
-```
-
-### 4. Atualizar o app
+1. Envie o código para um repositório **público** no GitHub
+2. **Settings → Pages → Source:** GitHub Actions
+3. Aguarde o workflow **Deploy PWA no GitHub Pages**
+4. Acesse `https://SEU_USUARIO.github.io/NOME_DO_REPO/`
 
 ```bash
 git add .
-git commit -m "Descrição da alteração"
+git commit -m "Atualizar app"
 git push
 ```
 
-O site atualiza automaticamente em 1–2 minutos.
+### Instalar no celular
+
+- **Android:** Chrome → ⋮ → Instalar app
+- **iPhone:** Safari → Compartilhar → Adicionar à Tela de Início
 
 ---
 
@@ -174,49 +107,40 @@ O site atualiza automaticamente em 1–2 minutos.
 
 ```
 Sorteio_kart/
-├── main.py                 # App desktop (Tkinter)
-├── ocr_utils.py            # OCR para a versão desktop
-├── requirements.txt        # Dependências Python
-├── pwa/                    # Versão web (PWA)
+├── main.py                 # App desktop
+├── sorteio_core.py         # Lógica compartilhada (validação, seed, WhatsApp)
+├── storage_desktop.py      # Persistência JSON (desktop)
+├── ocr_utils.py            # OCR desktop
+├── requirements.txt
+├── dados_sorteio.json      # Dados salvos (desktop, gerado automaticamente)
+├── pwa/
 │   ├── index.html
 │   ├── manifest.json
 │   ├── sw.js
 │   ├── css/styles.css
-│   ├── js/app.js
-│   ├── js/ocr.js
-│   └── icons/
+│   └── js/
+│       ├── core.js         # Lógica do sorteio
+│       ├── storage.js      # localStorage + eventos
+│       ├── export.js       # WhatsApp e imagem
+│       ├── ocr.js          # OCR com ajustes
+│       └── app.js          # Interface
 └── .github/workflows/
-    └── deploy-pages.yml    # Deploy automático no GitHub Pages
+    └── deploy-pages.yml
 ```
 
 ---
 
-## Exemplo de uso
+## Exemplo
 
-**Pilotos:**
+**Pilotos:** João, Maria, Pedro  
+**Karts:** 1, 2, 3, 4  
+**Excluídos:** 4 (kart quebrado)
 
-```
-João Silva
-Maria Santos
-Pedro Lima
-```
-
-**Karts:**
-
-```
-7
-12
-3
-15
-```
-
-**Resultado possível:**
-
-| Piloto       | Kart |
-|--------------|------|
-| João Silva   | 12   |
-| Maria Santos | 7    |
-| Pedro Lima   | 3    |
+| Piloto | Kart |
+|--------|------|
+| João   | 2    |
+| Maria  | 1    |
+| Pedro  | 3    |
 
 ---
 
