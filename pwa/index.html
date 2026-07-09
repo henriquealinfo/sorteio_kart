@@ -36,14 +36,23 @@
         <div class="card-header">
           <h2>Pilotos</h2>
           <div class="card-actions">
-            <label class="btn btn-secondary" for="input-foto">
-              Ler print
+            <label class="btn btn-secondary" for="input-camera">
+              Câmera
+            </label>
+            <label class="btn btn-secondary" for="input-galeria">
+              Galeria
             </label>
             <input
-              id="input-foto"
+              id="input-camera"
               type="file"
               accept="image/*"
               capture="environment"
+              hidden
+            />
+            <input
+              id="input-galeria"
+              type="file"
+              accept="image/*"
               hidden
             />
           </div>

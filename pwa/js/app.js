@@ -4,7 +4,8 @@ const statusEl = document.getElementById("status");
 const resultadoVazioEl = document.getElementById("resultado-vazio");
 const resultadoTabelaEl = document.getElementById("resultado-tabela");
 const resultadoLinhasEl = document.getElementById("resultado-linhas");
-const inputFotoEl = document.getElementById("input-foto");
+const inputCameraEl = document.getElementById("input-camera");
+const inputGaleriaEl = document.getElementById("input-galeria");
 const dialogPreviewEl = document.getElementById("dialog-preview");
 const previewPilotosEl = document.getElementById("preview-pilotos");
 const previewInfoEl = document.getElementById("preview-info");
@@ -157,8 +158,16 @@ async function processarImagem(file) {
     definirStatus("Falha ao ler o print.");
     console.error(error);
   } finally {
-    inputFotoEl.value = "";
+    inputCameraEl.value = "";
+    inputGaleriaEl.value = "";
   }
+}
+
+function configurarImportacaoImagem(inputEl) {
+  inputEl.addEventListener("change", (event) => {
+    const file = event.target.files?.[0];
+    processarImagem(file);
+  });
 }
 
 function registrarServiceWorker() {
@@ -194,10 +203,8 @@ function configurarInstalacaoPwa() {
 
 document.getElementById("btn-sortear").addEventListener("click", sortear);
 document.getElementById("btn-limpar").addEventListener("click", limparTudo);
-inputFotoEl.addEventListener("change", (event) => {
-  const file = event.target.files?.[0];
-  processarImagem(file);
-});
+configurarImportacaoImagem(inputCameraEl);
+configurarImportacaoImagem(inputGaleriaEl);
 
 dialogPreviewEl.addEventListener("close", () => {
   if (dialogPreviewEl.returnValue === "confirm") {
