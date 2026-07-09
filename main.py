@@ -554,19 +554,66 @@ class SorteioKartApp:
         ttk.Button(janela, text="Fechar", command=janela.destroy).pack(pady=20)
 
     def _abrir_historico(self) -> None:
+        historico = self.dados.get("historico", [])
         janela = tk.Toplevel(self.root)
         janela.title("Histórico")
-        janela.geometry("520x400")
-        texto = tk.Text(janela, font=("Segoe UI", 10))
-        texto.pack(fill=tk.BOTH, expand=True, padx=12, pady=12)
-        for item in self.dados.get("historico", []):
+        janela.geometry("560x420")
+        janela.transient(self.root)
+        janela.grab_set()
+
+        ttk.Label(
+            janela,
+            text="Selecione um sorteio e clique em Consultar (ou dê duplo clique).",
+            wraplength=500,
+        ).pack(anchor=tk.W, padx=12, pady=(12, 8))
+
+        frame = ttk.Frame(janela)
+        frame.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 8))
+
+        listbox = tk.Listbox(frame, font=("Segoe UI", 10), activestyle="dotbox")
+        scroll = ttk.Scrollbar(frame, orient=tk.VERTICAL, command=listbox.yview)
+        listbox.configure(yscrollcommand=scroll.set)
+        listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scroll.pack(side=tk.RIGHT, fill=tk.Y)
+
+        if not historico:
+            listbox.insert(tk.END, "Nenhum sorteio registrado ainda.")
+            listbox.config(state=tk.DISABLED)
+        else:
+            for item in historico:
+                data = datetime.fromisoformat(item["data"]).strftime("%d/%m/%Y %H:%M")
+                listbox.insert(
+                    tk.END,
+                    f"{item.get('evento_nome')} — {data} — {item.get('tipo')} — Código {item.get('seed')}",
+                )
+
+        botoes = ttk.Frame(janela)
+        botoes.pack(fill=tk.X, padx=12, pady=(0, 12))
+
+        def carregar_selecionado() -> None:
+            if not historico:
+                return
+            selecao = listbox.curselection()
+            if not selecao:
+                messagebox.showwarning("Atenção", "Selecione um item do histórico.", parent=janela)
+                return
+            item = historico[selecao[0]]
+            atribuicoes = [tuple(par) for par in item.get("atribuicoes", [])]
+            if not atribuicoes:
+                messagebox.showwarning("Atenção", "Este registro não possui dados.", parent=janela)
+                return
+            self._exibir_resultado(atribuicoes, item.get("seed") or 0)
             data = datetime.fromisoformat(item["data"]).strftime("%d/%m/%Y %H:%M")
-            resumo = ", ".join(f"{p}→{k}" for p, k in item.get("atribuicoes", [])[:4])
-            texto.insert(
-                tk.END,
-                f"{item.get('evento_nome')} | {data} | {item.get('tipo')} | Código {item.get('seed')}\n{resumo}\n\n",
+            self.status.config(
+                text=f"Consultando: {item.get('evento_nome')} — {data} ({item.get('tipo')})"
             )
-        texto.config(state=tk.DISABLED)
+            janela.destroy()
+
+        if historico:
+            listbox.bind("<Double-Button-1>", lambda _e: carregar_selecionado())
+
+        ttk.Button(botoes, text="Consultar", command=carregar_selecionado).pack(side=tk.RIGHT)
+        ttk.Button(botoes, text="Fechar", command=janela.destroy).pack(side=tk.RIGHT, padx=8)
 
     def _alternar_tema(self) -> None:
         self.tema_escuro = not self.tema_escuro

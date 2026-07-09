@@ -409,12 +409,56 @@ textarea:focus, .select-input:focus {
   max-height: 280px; overflow-y: auto; margin: 10px 0;
 }
 
-.repescar-item, .historico-item {
+.repescar-item {
   padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--surface-2);
   font-size: 0.88rem;
+}
+
+.historico-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.historico-item:hover,
+.historico-item:focus-visible {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, var(--surface-2));
+  outline: none;
+}
+
+.historico-item strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.92rem;
+}
+
+.historico-meta {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 6px;
+}
+
+.historico-resumo {
+  display: block;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.historico-dica {
+  margin: 0 0 10px;
 }
 
 .apresentacao {

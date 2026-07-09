@@ -320,23 +320,42 @@ function importarExcel(file) {
   leitor.readAsArrayBuffer(file);
 }
 
+function carregarDoHistorico(item) {
+  if (!item.atribuicoes?.length) {
+    window.alert("Este registro não possui dados de sorteio.");
+    return;
+  }
+  exibirResultado(item.atribuicoes, item.seed);
+  dialogHistoricoEl.close();
+  const data = new Date(item.data).toLocaleString("pt-BR");
+  definirStatus(
+    `Consultando: ${item.eventoNome || "Evento"} — ${data} (${item.tipo})`
+  );
+  resultadoTabelaEl.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 function abrirHistorico() {
   const lista = document.getElementById("historico-lista");
+  const dica = dialogHistoricoEl.querySelector(".historico-dica");
   lista.innerHTML = "";
   if (!dados.historico.length) {
+    if (dica) dica.classList.add("hidden");
     lista.innerHTML = '<p class="hint">Nenhum sorteio registrado ainda.</p>';
   } else {
+    if (dica) dica.classList.remove("hidden");
     for (const item of dados.historico) {
-      const div = document.createElement("div");
+      const div = document.createElement("button");
+      div.type = "button";
       div.className = "historico-item";
       const data = new Date(item.data).toLocaleString("pt-BR");
       const resumo = (item.atribuicoes || [])
         .slice(0, 3)
-        .map(([p, k]) => `${p}→${k}`)
-        .join(", ");
-      div.innerHTML = `<strong>${item.eventoNome || "Evento"}</strong> — ${data}<br/>
-        Tipo: ${item.tipo} | Código: ${item.seed}<br/>
-        ${resumo}${item.atribuicoes?.length > 3 ? "..." : ""}`;
+        .map(([p, k]) => `${p} → Kart ${k}`)
+        .join(" · ");
+      div.innerHTML = `<strong>${item.eventoNome || "Evento"}</strong>
+        <span class="historico-meta">${data} · ${item.tipo} · Código ${item.seed}</span>
+        <span class="historico-resumo">${resumo}${item.atribuicoes?.length > 3 ? " …" : ""}</span>`;
+      div.addEventListener("click", () => carregarDoHistorico(item));
       lista.appendChild(div);
     }
   }
